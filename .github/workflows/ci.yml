@@ -1,27 +1,28 @@
-name: ci
-  
-on: [pull_request]
+name: CI Workflow
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches:
+      - master
 
 jobs:
-  cd:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [14.17.5]
-
+  build:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
 
       - name: Setup node env
-        uses: actions/setup-node@v2.1.2
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
+          node-version: '18'
 
-      - name: Install dependencies 
-        run: npm install      
- 
+      - name: Install dependencies
+        run: npm install
+
       - name: Generate
-        run: npm run generate:github
+        run: |
+          echo "BASE_URL=/${{ github.event.repository.name }}" >> .env
+          npx nuxi generate
